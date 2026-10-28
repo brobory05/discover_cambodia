@@ -156,6 +156,7 @@ async function botAct(act, arg, label) {
   if (act === 'explore2') { $('#chatPanel').hidden = true; return openProvince(arg); }
   if (['hotels2', 'food2', 'best2'].includes(act)) {
     say('⏳ Loading, please wait...');
+    await new Promise(r => setTimeout(r, 100));
     const d = await get('province', { slug: arg });
     if (clog.lastElementChild && clog.lastElementChild.textContent.includes('Loading')) clog.lastElementChild.remove();
     if (act === 'hotels2') { const top = d.hotels.slice().sort((a, b) => (+b.rating || 0) - (+a.rating || 0)).slice(0, 3);

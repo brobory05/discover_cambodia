@@ -90,15 +90,19 @@ nav(); ?>
   <?php xbtn(); ?>
   <p class="label upper">Smart planner</p>
   <h2 class="sec-title"><?= e(t('planner')) ?></h2>
-  <div id="planner-error" style="display:none; background:rgba(255,138,128,.12); border:1px solid #ff8a80; color:#ff8a80; padding:14px 18px; border-radius:12px; margin-bottom:20px; font-weight:700;">
-    ⚠️ Please select at least one province (the checkboxes at the top) before clicking Make my plan.
-  </div>
   <form method="get" class="panelbox" id="plannerForm">
     <p class="muted"><?= e(t('provinces')) ?> *</p>
-    <div class="chips"><?php foreach ($provs as $p): ?><label class="chip"><input type="checkbox" name="provs[]" value="<?= e($p['slug']) ?>" <?= in_array($p['slug'], $sel, true) ? 'checked' : '' ?>> <?= e(pick($p)) ?></label><?php endforeach ?></div>
+    <div class="chips">
+      <?php foreach ($provs as $p): ?>
+        <label class="chip">
+          <input type="checkbox" name="provs[]" value="<?= e($p['slug']) ?>" required <?= in_array($p['slug'], $sel, true) ? 'checked' : '' ?>> 
+          <?= e(pick($p)) ?>
+        </label>
+      <?php endforeach ?>
+    </div>
     <div class="formgrid">
-      <label><?= e(t('days')) ?> (1–14)<input type="number" name="days" min="1" max="14" value="<?= $days ?>"></label>
-      <label><?= e(t('budget')) ?><input type="number" name="budget" min="10" step="5" value="<?= $budget ?>"></label>
+      <label><?= e(t('days')) ?> (1–14)<input type="number" name="days" min="1" max="14" value="<?= $days ?>" required></label>
+      <label><?= e(t('budget')) ?><input type="number" name="budget" min="10" step="5" value="<?= $budget ?>" required></label>
       <label>Transport<select name="transport"><?php foreach (['walk' => 'Walking (city only)', 'tuk_tuk' => 'Tuk tuk (city + nearby)', 'car' => 'Car / van (anywhere)'] as $k => $l): ?><option value="<?= $k ?>" <?= $transport === $k ? 'selected' : '' ?>><?= $l ?></option><?php endforeach ?></select></label>
       <label>Pace<select name="intensity"><?php foreach (['relaxed' => 'Relaxed (2 stops/day)', 'normal' => 'Normal (3 stops/day)', 'packed' => 'Packed (4 stops/day)'] as $k => $l): ?><option value="<?= $k ?>" <?= $intensity === $k ? 'selected' : '' ?>><?= $l ?></option><?php endforeach ?></select></label>
       <label>Travelling as<select name="group"><?php foreach (['solo' => 'Solo', 'friends' => 'Friends / couple', 'family' => 'Family with kids'] as $k => $l): ?><option value="<?= $k ?>" <?= $group === $k ? 'selected' : '' ?>><?= $l ?></option><?php endforeach ?></select></label>
@@ -125,26 +129,17 @@ nav(); ?>
 </main>
 <script>
 (function () {
-  var form = document.getElementById('plannerForm');
-  var errBox = document.getElementById('planner-error');
   var btn = document.getElementById('plannerBtn');
-  if (!form) return;
-  form.addEventListener('submit', function (e) {
-    var checked = form.querySelectorAll('input[name="provs[]"]:checked');
-    if (checked.length === 0) {
-      e.preventDefault();
-      errBox.style.display = 'block';
-      window.scrollTo({ top: errBox.offsetTop - 100, behavior: 'smooth' });
-      return;
-    }
-    errBox.style.display = 'none';
-    btn.textContent = 'Loading... Please wait';
-    btn.style.opacity = '0.7';
-    btn.style.pointerEvents = 'none';
-    setTimeout(function () {
-      btn.textContent = 'Loading... (this takes a few seconds)';
-    }, 100);
-  });
+  var form = document.getElementById('plannerForm');
+  if (form && btn) {
+    form.addEventListener('submit', function() {
+      if (form.checkValidity()) {
+        btn.textContent = 'Loading... Please wait';
+        btn.style.opacity = '0.7';
+        btn.style.pointerEvents = 'none';
+      }
+    });
+  }
 })();
 </script>
 <?php page_foot();
