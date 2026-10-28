@@ -23,12 +23,18 @@ try {
     case 'settings':
         json_out(array_column(rows("select key,value from app_settings where key in ('police_call','fire_call','police_telegram','fire_telegram','contact_telegram','contact_email')"), 'value', 'key'));
 
+    case 'hotel':
+        $h = row('select * from hotels where id=? and is_active=1', [(int)($_GET['id'] ?? 0)]);
+        if (!$h) json_out(['error' => 'not found'], 404);
+        $h['views'] = bump_view('hotel', (int)$h['id']);
+        json_out($h);
+
     case 'place':
         $p = row('select p.*, c.name_en cat_en, c.name_kh cat_kh, c.color cat_color, v.name_en prov_en, v.name_kh prov_kh, v.slug prov_slug
                   from places p left join categories c on c.id=p.category_id join provinces v on v.id=p.province_id where p.id=? and p.is_active=1', [(int)($_GET['id'] ?? 0)]);
         if (!$p) json_out(['error' => 'not found'], 404);
         $p['views'] = bump_view('place', (int)$p['id']);
-        $hcols = "id,name,type,rating,address,price_range,image_url,images,contact_number,telegram_link,facebook_url, coalesce((select views from item_views v where v.item_type='hotel' and v.item_id=hotels.id),0) as views";
+        $hcols = "id,name,type,rating,address,price_range,image_url,images,contact_number,telegram_link,facebook_url, description, coalesce((select views from item_views v where v.item_type='hotel' and v.item_id=hotels.id),0) as views";
         if ($p['latitude'] !== null && $p['longitude'] !== null) {   // nearest hotels first
             $hotels = rows("select $hcols, round(cast(6371 * acos(least(1, greatest(-1, cos(radians(cast(? as float8))) * cos(radians(latitude)) * cos(radians(longitude) - radians(cast(? as float8))) + sin(radians(cast(? as float8))) * sin(radians(latitude))))) as numeric), 1) as distance_km
                            from hotels where province_id=? and is_active=1 order by distance_km nulls last, sort_order, id limit 12", [$p['latitude'], $p['longitude'], $p['latitude'], $p['province_id']]);
@@ -49,7 +55,7 @@ try {
         json_out([
             'province' => $pv,
             'places' => rows('select p.id,p.name_en,p.name_kh,p.image_url,p.images,c.color cat_color,c.name_en cat_en,c.name_kh cat_kh, coalesce((select views from item_views v where v.item_type=\'place\' and v.item_id=p.id),0) as views from places p left join categories c on c.id=p.category_id where p.province_id=? and p.is_active=1 order by p.sort_order,p.id', [$id]),
-            'hotels' => rows('select id,name,type,rating,address,price_range,image_url,images,contact_number,telegram_link,facebook_url, coalesce((select views from item_views v where v.item_type=\'hotel\' and v.item_id=hotels.id),0) as views from hotels where province_id=? and is_active=1 order by sort_order,id', [$id]),
+            'hotels' => rows('select id,name,type,rating,address,price_range,image_url,images,contact_number,telegram_link,facebook_url,description, coalesce((select views from item_views v where v.item_type=\'hotel\' and v.item_id=hotels.id),0) as views from hotels where province_id=? and is_active=1 order by sort_order,id', [$id]),
             'food'   => rows('select id,restaurant_name_en,restaurant_name_kh,cuisine_type,opening_hours,price_range,image_url,images,contact_number,telegram_link,facebook_url, coalesce((select views from item_views v where v.item_type=\'restaurant\' and v.item_id=place_restaurants.id),0) as views from place_restaurants where province_id=? order by sort_order,id', [$id]),
             'weather'=> rows('select month_num,month_name,season,avg_temp_c from weather_months where province_id=? order by month_num', [$id]),
             'shops'  => rows('select id,name_en,name_kh,shop_type,description_en,description_kh,merchandise_en,merchandise_kh,address_en,address_kh,opening_hours,price_level,image_url,images,phone,website_url from province_shops where province_id=? and is_active=1 order by sort_order,id', [$id]),

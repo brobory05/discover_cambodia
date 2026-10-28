@@ -90,10 +90,30 @@ const close = () => { modal.hidden = true; document.body.style.overflow = ''; };
 
 const contact = (h, type) => { const info = safe(h.facebook_url || h.telegram_link);
   return (info ? `<a class="chip" target="_blank" rel="noopener" data-count="${type}:${h.id}" href="${esc(info)}">${T.info}</a>` : '') + `<a class="chip on" data-count="${type}:${h.id}" href="${C.base}/book.php?type=${type}&id=${h.id}">${T.booking}</a>`; };
-const hotelRow = h => `<div class="row2" data-type="${esc(h.type)}"><div class="rimg">${slides(h)}</div><div class="rtxt"><b>${esc(h.name)}</b><div>${h.type ? `<span class="tag">${esc(h.type)}</span>` : ''}${h.rating ? `<span class="tag">★ ${esc(h.rating)}</span>` : ''}${h.distance_km != null ? `<span class="tag">📍 ${esc(h.distance_km)} km</span>` : ''}${eye(h.views)}</div><small>${esc(h.address)}</small><div class="racts">${contact(h, 'hotel')}</div></div>${h.price_range ? `<span class="price">${esc(h.price_range)}</span>` : ''}</div>`;
+const hotelRow = h => `<div class="row2" data-type="${esc(h.type)}"><div class="rimg" style="cursor:pointer;" data-hotel="${h.id}">${slides(h)}</div><div class="rtxt"><b style="cursor:pointer;" data-hotel="${h.id}">${esc(h.name)}</b><div>${h.type ? `<span class="tag">${esc(h.type)}</span>` : ''}${h.rating ? `<span class="tag">★ ${esc(h.rating)}</span>` : ''}${h.distance_km != null ? `<span class="tag">📍 ${esc(h.distance_km)} km</span>` : ''}${eye(h.views)}</div><small>${esc(h.address)}</small><div class="racts">${contact(h, 'hotel')}</div></div>${h.price_range ? `<span class="price">${esc(h.price_range)}</span>` : ''}</div>`;
 const foodRow = f => `<div class="row2" data-type="${esc(f.cuisine_type)}"><div class="rimg">${slides(f)}</div><div class="rtxt"><b>${esc(nm(f, 'restaurant_name'))}</b><div>${f.cuisine_type ? `<span class="tag">${esc(f.cuisine_type)}</span>` : ''}${eye(f.views)}</div><small>${esc(f.opening_hours)}</small><div class="racts"><button class="chip" data-menu="${f.id}" data-count="restaurant:${f.id}">🍽 ${T.menu}</button>${contact(f, 'restaurant')}</div><div class="menu" id="menu-${f.id}" hidden></div></div>${f.price_range ? `<span class="price">${esc(f.price_range)}</span>` : ''}</div>`;
 const shopRow = s => `<div class="row2"><div class="rimg">${slides(s)}</div><div class="rtxt"><b>${esc(nm(s))}</b><div>${s.shop_type ? `<span class="tag">${esc(s.shop_type)}</span>` : ''}</div><small>${esc(L === 'kh' && s.merchandise_kh ? s.merchandise_kh : s.merchandise_en)}</small><small>${esc(nm(s, 'address'))} ${esc(s.opening_hours)}</small><div class="racts">${safe(s.website_url) ? `<a class="chip" target="_blank" rel="noopener" href="${esc(s.website_url)}">${esc(T.website)}</a>` : ''}${s.phone ? `<a class="chip on" href="tel:${esc(s.phone)}">${esc(T.call)}</a>` : ''}</div></div>${s.price_level ? `<span class="price">${esc(s.price_level)}</span>` : ''}</div>`;
 const list = (items, row) => !items.length ? '<p>—</p>' : `<div class="more-list">${items.slice(0, 2).map(row).join('')}<div class="extra">${items.slice(2).map(row).join('')}</div></div>` + (items.length > 2 ? `<button class="more upper" data-more>${esc(T.show_more)} (${items.length - 2})</button>` : '');
+
+async function openHotel(id) {
+  show(spinnerHTML);
+  const h = await get('hotel', { id });
+  if (!h || h.error) return close();
+  const col = '#7A3B10';
+  show(`<button class="x" data-close>✕</button>
+  <div class="hdr" style="background:linear-gradient(160deg,${col},${col}88);height:220px">${slides(h)}<div class="grad"></div><div class="hdr-t"><span class="pill upper">${esc(h.type || 'Hotel')}</span><h2>${esc(h.name)}</h2><small>${esc(h.address)}</small></div></div>
+  <div class="body">
+    <div class="acts"><a class="chip on" target="_blank" rel="noopener" href="${C.base}/book.php?type=hotel&id=${h.id}">${T.booking}</a></div>
+    <h4>About</h4><p>${esc(h.description || 'No description provided.')}</p>
+    ${h.amenities ? `<h4>Amenities</h4><p>${esc(h.amenities)}</p>` : ''}
+    <div class="info">
+        <div><small>${T.price}</small>${esc(h.price_range || '—')}</div>
+        <div><small>Rating</small>★ ${esc(h.rating || '—')}</div>
+        <div><small>Phone</small>${esc(h.contact_number || '—')}</div>
+    </div>
+  </div>`);
+  initSlides(sheet);
+}
 
 async function openPlace(id) {
   show(spinnerHTML);
@@ -130,8 +150,8 @@ async function openProvince(slug) {
   const hasShops = d.shops && d.shops.length;
   show(`<button class="x" data-close>✕</button>
   <div class="hdr" style="background:linear-gradient(160deg,${col},${col}88);height:170px">${slides(pv)}<div class="grad"></div><div class="hdr-t"><small class="upper">${esc(pv.region)}</small><h2>${esc(pv.name_en)}</h2><small>${esc(pv.name_kh)}</small></div></div>
-  <div class="tabs" style="display:flex; justify-content:flex-start; align-items:center;">
-    <button class="x" data-close aria-label="Close" style="position:static; width:34px; height:34px; flex-shrink:0; border-radius:8px; background:transparent; border:1px solid var(--border); color:var(--cream); margin-right:12px;">✕</button>
+  <div class="tabs" style="display:flex; justify-content:flex-start; align-items:center; padding: 10px 14px;">
+    <button class="x" data-close aria-label="Close" style="position:static; flex: 0 0 34px !important; width:34px; height:34px; border-radius:8px; background:transparent; border:1px solid var(--border); color:var(--cream); margin-right:12px;">✕</button>
     <div style="display:flex; gap:8px; overflow-x:auto; width:100%;">
       <button class="on" data-tab="places">${T.places}</button><button data-tab="hotels">${T.hotels}</button><button data-tab="food">${T.food}</button>${hasShops ? `<button data-tab="shops">${T.shops}</button>` : ''}
     </div>
@@ -202,6 +222,7 @@ document.addEventListener('click', async e => {
     return;
   }
   const bot = t.closest('[data-bot]'); if (bot) return botAct(bot.dataset.bot, bot.dataset.arg, bot.textContent);
+  const hc = t.closest('[data-hotel]'); if (hc) return openHotel(hc.dataset.hotel);
   const pl = t.closest('[data-place]'); if (pl) { qres && (qres.hidden = true); return openPlace(pl.dataset.place); }
   const pr = t.closest('[data-prov]'); if (pr && pr.dataset.prov) { qres && (qres.hidden = true); return openProvince(pr.dataset.prov); }
   const mm = t.closest('[data-more]'); if (mm) { const l = mm.previousElementSibling; l.classList.toggle('open'); mm.textContent = l.classList.contains('open') ? T.show_less : T.show_more; return; }
