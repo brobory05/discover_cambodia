@@ -8,7 +8,6 @@ function km(array $a, array $b): float {
     $h = sin(($la2 - $la1) / 2) ** 2 + cos($la1) * cos($la2) * sin(($lo2 - $lo1) / 2) ** 2;
     return 12742 * asin(sqrt($h));
 }
-/** Visit order inside one day: nearest-neighbour walk from the first stop. */
 function route(array $stops): array {
     if (count($stops) < 3) return $stops;
     $out = [array_shift($stops)];
@@ -51,7 +50,7 @@ if ($sel) {
                   (select round(avg(rating),1) from reviews r where r.place_id=p.id) avg_rating
                   from places p join provinces v on v.id=p.province_id join categories c on c.id=p.category_id
                   where v.slug in ($ph) and p.is_active=1 and (p.entry_fee_usd is null or p.entry_fee_usd <= ?) $zone $kids $tagSql", $args);
-    foreach ($cand as &$p) {                                             // score
+    foreach ($cand as &$p) {
         $sc = 0;
         foreach ($tags as $t) if (stripos((string)$p['planner_tags'], $t) !== false) $sc += 15;
         if ($p['is_featured']) $sc += 20;
@@ -61,7 +60,7 @@ if ($sel) {
     } unset($p);
     usort($cand, fn($a, $b) => $b['_s'] <=> $a['_s']);
     $plan = []; $used = [];
-    for ($d = 1; $d <= $days; $d++) {                                     // fill each day: city -> near -> mid -> far
+    for ($d = 1; $d <= $days; $d++) {
         $stops = [];
         foreach (['city', 'near', 'mid', 'far'] as $z) foreach ($cand as $p) {
             if (count($stops) >= $slots) break 2;
@@ -90,19 +89,24 @@ nav(); ?>
   <?php xbtn(); ?>
   <p class="label upper">Smart planner</p>
   <h2 class="sec-title"><?= e(t('planner')) ?></h2>
+  
+  <div id="planner-error" style="display:none; background:#ffe5e5; border:1px solid #ff8a80; color:#d32f2f; padding:14px 18px; border-radius:12px; margin-bottom:20px; font-weight:700;">
+    ⚠️ Please select at least one province (the checkboxes at the top) before clicking Make my plan.
+  </div>
+
   <form method="get" class="panelbox" id="plannerForm">
     <p class="muted"><?= e(t('provinces')) ?> *</p>
     <div class="chips">
       <?php foreach ($provs as $p): ?>
         <label class="chip">
-          <input type="checkbox" name="provs[]" value="<?= e($p['slug']) ?>" required <?= in_array($p['slug'], $sel, true) ? 'checked' : '' ?>> 
+          <input type="checkbox" name="provs[]" value="<?= e($p['slug']) ?>" <?= in_array($p['slug'], $sel, true) ? 'checked' : '' ?>> 
           <?= e(pick($p)) ?>
         </label>
       <?php endforeach ?>
     </div>
     <div class="formgrid">
-      <label><?= e(t('days')) ?> (1–14)<input type="number" name="days" min="1" max="14" value="<?= $days ?>" required></label>
-      <label><?= e(t('budget')) ?><input type="number" name="budget" min="10" step="5" value="<?= $budget ?>" required></label>
+      <label><?= e(t('days')) ?> (1–14)<input type="number" name="days" min="1" max="14" value="<?= $days ?>"></label>
+      <label><?= e(t('budget')) ?><input type="number" name="budget" min="10" step="5" value="<?= $budget ?>"></label>
       <label>Transport<select name="transport"><?php foreach (['walk' => 'Walking (city only)', 'tuk_tuk' => 'Tuk tuk (city + nearby)', 'car' => 'Car / van (anywhere)'] as $k => $l): ?><option value="<?= $k ?>" <?= $transport === $k ? 'selected' : '' ?>><?= $l ?></option><?php endforeach ?></select></label>
       <label>Pace<select name="intensity"><?php foreach (['relaxed' => 'Relaxed (2 stops/day)', 'normal' => 'Normal (3 stops/day)', 'packed' => 'Packed (4 stops/day)'] as $k => $l): ?><option value="<?= $k ?>" <?= $intensity === $k ? 'selected' : '' ?>><?= $l ?></option><?php endforeach ?></select></label>
       <label>Travelling as<select name="group"><?php foreach (['solo' => 'Solo', 'friends' => 'Friends / couple', 'family' => 'Family with kids'] as $k => $l): ?><option value="<?= $k ?>" <?= $group === $k ? 'selected' : '' ?>><?= $l ?></option><?php endforeach ?></select></label>
@@ -128,18 +132,20 @@ nav(); ?>
   <?php endif ?>
 </main>
 <script>
-(function () {
-  var btn = document.getElementById('plannerBtn');
-  var form = document.getElementById('plannerForm');
-  if (form && btn) {
-    form.addEventListener('submit', function() {
-      if (form.checkValidity()) {
+document.getElementById('plannerForm').addEventListener('submit', function(e) {
+    var checked = this.querySelectorAll('input[name="provs[]"]:checked');
+    var errBox = document.getElementById('planner-error');
+    if (checked.length === 0) {
+        e.preventDefault();
+        errBox.style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+        errBox.style.display = 'none';
+        var btn = document.getElementById('plannerBtn');
         btn.textContent = 'Loading... Please wait';
         btn.style.opacity = '0.7';
         btn.style.pointerEvents = 'none';
-      }
-    });
-  }
-})();
+    }
+});
 </script>
 <?php page_foot();
