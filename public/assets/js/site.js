@@ -14,6 +14,7 @@ const lines = s => String(s || '').split(/\n|\|/).map(x => x.trim()).filter(Bool
 const fmt = n => { n = +n || 0; return n >= 1e6 ? (n / 1e6).toFixed(1).replace(/\.0$/, '') + 'M' : n >= 1e3 ? (n / 1e3).toFixed(1).replace(/\.0$/, '') + 'K' : String(n); };
 const eye = n => n != null ? `<span class="tag">👁 ${fmt(n)}</span>` : '';
 const clipN = () => innerWidth <= 640 ? 2 : innerWidth <= 1024 ? 3 : innerWidth < 1700 ? 4 : innerWidth < 2200 ? 5 : 6;
+const spinnerHTML = '<div class="body" style="padding:60px 20px; text-align:center; font-size:1.2rem;"><span class="spinner" style="width:30px; height:30px; border-width:4px; margin-bottom:15px;"></span><br>Loading...</div>';
 
 $('#theme')?.addEventListener('click', () => { const l = document.body.classList.toggle('theme-light'); localStorage.theme = l ? 'light' : 'dark'; });
 const panel = $('#navpanel'), burger = $('#burger');
@@ -95,7 +96,7 @@ const shopRow = s => `<div class="row2"><div class="rimg">${slides(s)}</div><div
 const list = (items, row) => !items.length ? '<p>—</p>' : `<div class="more-list">${items.slice(0, 2).map(row).join('')}<div class="extra">${items.slice(2).map(row).join('')}</div></div>` + (items.length > 2 ? `<button class="more upper" data-more>${esc(T.show_more)} (${items.length - 2})</button>` : '');
 
 async function openPlace(id) {
-  show('<div class="body">…</div>');
+  show(spinnerHTML);
   const d = await get('place', { id }), p = d.place; if (!p) return close();
   const col = p.cat_color || '#7A3B10';
   const infoItems = [[T.province, nm({ name_en: p.prov_en, name_kh: p.prov_kh })], [T.category, nm({ name_en: p.cat_en, name_kh: p.cat_kh })], [T.price, p.entry_fee], [T.time, p.duration], [T.difficulty, p.difficulty], [T.opening, p.opening_hours], [T.best_time, nm(p, 'best_time')], [T.main_product, nm(p, 'main_product')]].filter(x => x[1]);
@@ -121,7 +122,7 @@ async function openPlace(id) {
 }
 
 async function openProvince(slug) {
-  show('<div class="body">…</div>');
+  show(spinnerHTML);
   const d = await get('province', { slug }), pv = d.province; if (!pv) return close();
   const col = pv.cover_color || '#7A3B10';
   const chips = (arr, key) => { const s = [...new Set(arr.map(x => x[key]).filter(Boolean))]; return s.length > 1 ? `<div class="chiprow"><button class="on" data-chip="">${T.all}</button>${s.map(x => `<button data-chip="${esc(x)}">${esc(x)}</button>`).join('')}</div>` : ''; };
