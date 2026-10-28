@@ -29,7 +29,7 @@ function admin_resources(): array {
         $T('slug', 'Slug', true), $T('name_en', 'Name (EN)', true), $T('name_kh', 'Name (KH)', true), $T('icon', 'Icon'), $T('color', 'Color (#hex)', true), $N('sort_order', 'Sort order')]],
       'hotels' => ['title' => 'Hotels', 'group' => 'Content', 'table' => 'hotels', 'fields' => [
         $PROV, $T('name', 'Name', true), $S('type', 'Type', ['Hotel', 'Guesthouse', 'Hostel', 'Resort', 'Homestay'], true), $T('price_range', 'Price range', true), $N('rating', 'Rating'),
-        $T('address', 'Address'), $T('amenities', 'Amenities'), $IMGS(), $N('latitude', 'Latitude'), $N('longitude', 'Longitude'),
+        $T('address', 'Address'), $T('amenities', 'Amenities'), $A('description', 'Description (shows in the room info)'), $IMGS(), $N('latitude', 'Latitude'), $N('longitude', 'Longitude'),
         $T('contact_number', 'Phone'), $T('telegram_link', 'Telegram link'), $T('facebook_url', 'Facebook URL'), $F('is_active', 'Active'), $N('sort_order', 'Sort order')]],
       'restaurants' => ['title' => 'Restaurants', 'group' => 'Content', 'table' => 'place_restaurants', 'fields' => [
         $PROV, $T('province_name', 'Province name (text)'), $T('place_name', 'Near place'), $T('restaurant_name_en', 'Name (EN)', true), $T('restaurant_name_kh', 'Name (KH)'),
@@ -100,8 +100,8 @@ function admin_resources(): array {
       'qr' => ['title' => 'Bank QR codes', 'group' => 'Settings', 'table' => 'app_settings', 'pk' => 'key', 'where' => "key like 'qr\\_%'", 'keyPrefix' => 'qr_', 'fields' => [
         ['createOnly' => true, 'req' => true] + $T('key', 'Name (must start with qr_, e.g. qr_aba)', true), ['list' => true] + $IMGS('value', 'QR picture', null, true)]],
       'room-prices' => ['title' => 'Room prices', 'group' => 'Settings', 'table' => 'room_prices', 'order' => 'sort_order', 'fields' => [
-        $N('bed_count', 'Beds (1-4)', true), $S('class', 'Class', ['Fan', 'Air-con', 'Deluxe', 'Premium', 'VIP Suite', 'Family Room'], true), $N('price_usd', 'Price USD / night', true),
-        $F('is_active', 'Active'), $N('sort_order', 'Sort order', true)]],
+        $N('bed_count', 'Beds (1-4)', true), $S('class', 'Class', ['Fan', 'Air-con', 'Deluxe', 'Premium', 'VIP Suite', 'Family Room'], true), 
+        $N('price_usd', 'Price USD / night', true), $IMGS('image_url', 'Room picture', null, true), $F('is_active', 'Active'), $N('sort_order', 'Sort order', true)]],
       'users' => ['title' => 'Users', 'group' => 'People', 'table' => 'users', 'noCreate' => true, 'desc' => true, 'fields' => [
         $T('name', 'Name', true), $T('email', 'Email', true), $T('phone', 'Phone'), $N('total_spent', 'Total spent (USD) → sets loyalty level', true), $N('points_balance', 'Coins (points)', true)]],
       'loyalty' => ['title' => 'Loyalty levels', 'group' => 'Settings', 'table' => 'loyalty_levels', 'pk' => 'level', 'fields' => [
@@ -109,6 +109,7 @@ function admin_resources(): array {
       'settings' => ['title' => 'Site settings', 'group' => 'Settings', 'table' => 'app_settings', 'pk' => 'key', 'where' => "key not like 'qr\\_%'", 'fields' => [
         ['createOnly' => true] + $T('key', 'Key', true), $T('value', 'Value', true)]],
     ];
+    // required fields (marked * in the form and checked before saving)
     $req = ['places' => ['province_id', 'name_en'], 'provinces' => ['slug', 'name_en'], 'categories' => ['slug', 'name_en'], 'hotels' => ['province_id', 'name'],
         'restaurants' => ['province_id', 'province_name', 'restaurant_name_en'], 'festivals' => ['name_en'], 'sponsors' => ['title'], 'top-places' => ['place_id'],
         'notifications' => ['title_en'], 'menu-items' => ['restaurant_id', 'name_en'], 'shops' => ['province_id', 'slug', 'name_en'], 'rewards' => ['name_en', 'cost_points'],

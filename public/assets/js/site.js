@@ -129,7 +129,7 @@ async function openProvince(slug) {
   const hasShops = d.shops && d.shops.length;
   show(`<button class="x" data-close>✕</button>
   <div class="hdr" style="background:linear-gradient(160deg,${col},${col}88);height:170px">${slides(pv)}<div class="grad"></div><div class="hdr-t"><small class="upper">${esc(pv.region)}</small><h2>${esc(pv.name_en)}</h2><small>${esc(pv.name_kh)}</small></div></div>
-  <div class="tabs"><button class="on" data-tab="places">${T.places}</button><button data-tab="hotels">${T.hotels}</button><button data-tab="food">${T.food}</button>${hasShops ? `<button data-tab="shops">${T.shops}</button>` : ''}<button class="x2" data-close aria-label="Close">✕</button></div>
+  <div class="tabs" style="display:flex; justify-content:space-between;"><div style="display:flex; gap:8px; overflow-x:auto; width:100%;"><button class="on" data-tab="places">${T.places}</button><button data-tab="hotels">${T.hotels}</button><button data-tab="food">${T.food}</button>${hasShops ? `<button data-tab="shops">${T.shops}</button>` : ''}</div><button class="x2" data-close aria-label="Close" style="position:static; flex-shrink:0; margin-left:10px;">✕</button></div>
   <div class="body">
    <div class="pane" data-pane="places"><p>${esc(L === 'kh' && pv.description_kh ? pv.description_kh : pv.description_en)}</p>${wx}<div class="tgrid" style="margin-top:14px">${d.places.map(p => `<div class="card" data-place="${p.id}" style="background:linear-gradient(160deg,${p.cat_color || '#7A3B10'},${p.cat_color || '#7A3B10'}88)">${slides(p)}<div class="grad"></div>${p.views != null ? `<span class="views">👁 ${fmt(p.views)}</span>` : ''}<div class="txt"><b>${esc(p.name_en)}</b><span>${esc(p.name_kh)}</span></div><div class="cta"><button class="upper">${T.open}</button></div></div>`).join('')}</div></div>
    <div class="pane" data-pane="hotels" hidden><h4>${T.where_stay}</h4>${chips(d.hotels, 'type')}<div class="rows2">${d.hotels.map(hotelRow).join('') || '<p>—</p>'}</div></div>
@@ -155,7 +155,7 @@ async function botAct(act, arg, label) {
   if (act === 'plan2') { say(`<a href="${C.base}/planner.php?provinces=${encodeURIComponent(arg)}">${esc(T.bot_plan2)}</a>`); return again(); }
   if (act === 'explore2') { $('#chatPanel').hidden = true; return openProvince(arg); }
   if (['hotels2', 'food2', 'best2'].includes(act)) {
-    say('⏳ Loading, please wait...');
+    say('<span class="spinner"></span> Loading data...');
     await new Promise(r => setTimeout(r, 100));
     const d = await get('province', { slug: arg });
     if (clog.lastElementChild && clog.lastElementChild.textContent.includes('Loading')) clog.lastElementChild.remove();

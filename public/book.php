@@ -22,16 +22,18 @@ if (isset($_GET['done'])) {
 
 $type = ($_GET['type'] ?? '') === 'restaurant' ? 'restaurant' : 'hotel';
 $item = $type === 'hotel'
-    ? row('select id,province_id,name,type,price_range,address from hotels where id=? and is_active=1', [(int)($_GET['id'] ?? 0)])
+    ? row('select id,province_id,name,type,price_range,address,description from hotels where id=? and is_active=1', [(int)($_GET['id'] ?? 0)])
     : row('select id,province_id,restaurant_name_en as name,cuisine_type as type,price_range,opening_hours as address from place_restaurants where id=?', [(int)($_GET['id'] ?? 0)]);
 if (!$item) { http_response_code(404); exit('Not found'); }
 
-$rooms = $type === 'hotel' ? rows("select bed_count,class,price_usd from room_prices where is_active=1 order by bed_count,sort_order,class") : [];
-$bedOpts = []; $classOpts = []; $priceMap = [];
+$rooms = $type === 'hotel' ? rows("select bed_count,class,price_usd,image_url from room_prices where is_active=1 order by bed_count,sort_order,class") : [];
+$bedOpts = []; $classOpts = []; $priceMap = []; $imgMap = [];
 foreach ($rooms as $rp) {
     $bedOpts[$rp['bed_count']] = $rp['bed_count'];
     $classOpts[$rp['class']] = 1;
-    $priceMap[$rp['bed_count'] . '|' . $rp['class']] = (float)$rp['price_usd'];
+    $key = $rp['bed_count'] . '|' . $rp['class'];
+    $priceMap[$key] = (float)$rp['price_usd'];
+    $imgMap[$key] = $rp['image_url'] ?? '';
 }
 ksort($bedOpts); $classOpts = array_keys($classOpts);
 
@@ -81,12 +83,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 $v = fn($k, $d = '') => e($_POST[$k] ?? $d);
 $roomsJson = json_encode($priceMap, JSON_UNESCAPED_UNICODE);
+$imgsJson = json_encode($imgMap, JSON_UNESCAPED_UNICODE);
 page_head('Book ' . $item['name'] . ' — Discover Cambodia'); nav(); ?>
 <main class="wrap section">
   <?php xbtn(); ?>
   <p class="label upper"><?= $type === 'hotel' ? 'Hotel booking' : 'Table reservation' ?></p>
   <h2 class="sec-title"><?= e($item['name']) ?></h2>
   <p class="muted" style="margin-bottom:16px"><?= e($item['type']) ?> · <?= e($item['address']) ?> · <?= e($item['price_range']) ?></p>
+  
+  <?php if ($type === 'hotel' && !empty($item['description'])): ?>
+    <div class="panelbox" style="margin-bottom:20px;"><h4>About the hotel</h4><p><?= nl2br(e($item['description'])) ?></p></div>
+  <?php endif; ?>
+
   <?php if ($lv['pct'] > 0): ?><p class="ok">Loyalty level <?= $lv['level'] ?>: <?= rtrim(rtrim(number_format($lv['pct'], 2), '0'), '.') ?>% discount is applied automatically.</p><?php endif ?>
   <form method="post" class="panelbox"><input type="hidden" name="csrf" value="<?= e(csrf()) ?>">
     <div class="formgrid">
@@ -99,7 +107,10 @@ page_head('Book ' . $item['name'] . ' — Discover Cambodia'); nav(); ?>
         <label>Rooms<input type="number" name="rooms" min="1" max="10" value="<?= $v('rooms', '1') ?>"></label>
         <label>Beds *<select name="bed_count" id="bedSel" required><option value="">—</option><?php foreach ($bedOpts as $b): ?><option value="<?= (int)$b ?>" <?= (string)$v('bed_count') === (string)$b ? 'selected' : '' ?>><?= (int)$b ?> Bed<?= $b > 1 ? 's' : '' ?></option><?php endforeach ?></select></label>
         <label>Room class *<select name="room_class" id="classSel" required><option value="">—</option><?php foreach ($classOpts as $c): ?><option value="<?= e($c) ?>" <?= $v('room_class') === $c ? 'selected' : '' ?>><?= e($c) ?></option><?php endforeach ?></select></label>
-        <p class="wide ok" id="priceNow" style="font-size:1.05rem"></p>
+        <div class="wide" id="roomPreview" style="display:none; margin: 10px 0; text-align:center; background: rgba(255,255,255,.05); padding: 16px; border-radius: 16px; border: 1px solid var(--border);">
+          <img id="previewImg" src="" alt="Room preview" style="width:100%; max-width:400px; border-radius:12px; margin-bottom:10px; display:none; margin-left:auto; margin-right:auto;">
+          <p class="ok" id="priceNow" style="font-size:1.2rem; font-weight:bold;"></p>
+        </div>
       <?php else: ?>
         <label>Time<input type="time" name="reserve_time" value="<?= $v('reserve_time') ?>"></label>
         <label>Meal<select name="meal_type"><?php foreach (['Breakfast', 'Lunch', 'Dinner'] as $o): ?><option <?= ($_POST['meal_type'] ?? '') === $o ? 'selected' : '' ?>><?= $o ?></option><?php endforeach ?></select></label>
@@ -118,12 +129,27 @@ page_head('Book ' . $item['name'] . ' — Discover Cambodia'); nav(); ?>
 <script>
 (function () {
   var prices = <?= $roomsJson ?>;
-  var bed = document.getElementById('bedSel'), cls = document.getElementById('classSel'), out = document.getElementById('priceNow');
+  var imgs = <?= $imgsJson ?>;
+  var bed = document.getElementById('bedSel'), cls = document.getElementById('classSel');
+  var out = document.getElementById('priceNow'), box = document.getElementById('roomPreview'), img = document.getElementById('previewImg');
+  
   function update() {
-    if (!bed.value || !cls.value) { out.textContent = ''; return; }
-    var p = prices[bed.value + '|' + cls.value];
-    if (p == null) { out.textContent = ''; return; }
+    if (!bed.value || !cls.value) { box.style.display = 'none'; return; }
+    var key = bed.value + '|' + cls.value;
+    var p = prices[key];
+    var i = imgs[key];
+    
+    if (p == null) { box.style.display = 'none'; return; }
+    
+    box.style.display = 'block';
     out.textContent = '$' + p.toFixed(2) + ' / night';
+    
+    if (i) {
+        img.src = i.startsWith('http') ? i : '<?= u('') ?>/' + i;
+        img.style.display = 'block';
+    } else {
+        img.style.display = 'none';
+    }
   }
   bed.addEventListener('change', update);
   cls.addEventListener('change', update);
