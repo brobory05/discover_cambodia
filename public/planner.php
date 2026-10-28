@@ -91,7 +91,6 @@ nav(); ?>
   <h2 class="sec-title"><?= e(t('planner')) ?></h2>
   
   <div id="planner-error" style="display:none; background:#ffe5e5; border:1px solid #ff8a80; color:#d32f2f; padding:14px 18px; border-radius:12px; margin-bottom:20px; font-weight:700;">
-    ⚠️ Please select at least one province (the checkboxes at the top) before clicking Make my plan.
   </div>
 
   <form method="get" class="panelbox" id="plannerForm">
@@ -135,17 +134,41 @@ nav(); ?>
 document.getElementById('plannerForm').addEventListener('submit', function(e) {
     var checked = this.querySelectorAll('input[name="provs[]"]:checked');
     var errBox = document.getElementById('planner-error');
+    var btn = document.getElementById('plannerBtn');
+    var form = this;
+    
+    // 1. Check if provinces are selected
     if (checked.length === 0) {
         e.preventDefault();
+        errBox.innerHTML = '⚠️ Please select at least one province (the checkboxes at the top) before clicking Make my plan.';
         errBox.style.display = 'block';
         window.scrollTo({ top: 0, behavior: 'smooth' });
-    } else {
-        errBox.style.display = 'none';
-        var btn = document.getElementById('plannerBtn');
-        btn.textContent = 'Loading... Please wait';
-        btn.style.opacity = '0.7';
-        btn.style.pointerEvents = 'none';
+        return;
     }
+
+    // 2. Check if user is logged in
+    if (!window.CFG.user) {
+        e.preventDefault();
+        var loginUrl = window.CFG.base + '/login.php?next=' + encodeURIComponent(location.pathname + location.search);
+        errBox.innerHTML = '⚠️ Please <a href="' + loginUrl + '" style="color:#d32f2f;text-decoration:underline;">log in</a> to create a trip plan.';
+        errBox.style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+    }
+
+    // 3. Everything is fine, STOP the form temporarily to show the spinner
+    e.preventDefault(); 
+    errBox.style.display = 'none';
+    
+    // Change the button to show the loading spinner
+    btn.innerHTML = '<span style="display:inline-block; width:12px; height:12px; border:2px solid rgba(0,0,0,0.2); border-top-color:#1B1008; border-radius:50%; animation:spin 1s linear infinite; margin-right:8px; vertical-align:middle;"></span> Loading... Please wait';
+    btn.style.opacity = '0.8';
+    btn.style.pointerEvents = 'none';
+    
+    // Wait 100 milliseconds so the browser can draw the spinner, THEN submit the form
+    setTimeout(function() {
+        form.submit();
+    }, 100);
 });
 </script>
 <?php page_foot();
