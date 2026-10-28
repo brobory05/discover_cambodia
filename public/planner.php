@@ -87,9 +87,13 @@ $hidden = function () use ($sel, $days, $budget, $transport, $intensity, $group,
 page_head(t('planner') . ' — Discover Cambodia');
 nav(); ?>
 <main class="wrap section">
+  <?php xbtn(); ?>
   <p class="label upper">Smart planner</p>
   <h2 class="sec-title"><?= e(t('planner')) ?></h2>
-  <form method="get" class="panelbox">
+  <div id="planner-error" style="display:none; background:rgba(255,138,128,.12); border:1px solid #ff8a80; color:#ff8a80; padding:14px 18px; border-radius:12px; margin-bottom:20px; font-weight:700;">
+    ⚠️ Please select at least one province (the checkboxes at the top) before clicking Make my plan.
+  </div>
+  <form method="get" class="panelbox" id="plannerForm">
     <p class="muted"><?= e(t('provinces')) ?> *</p>
     <div class="chips"><?php foreach ($provs as $p): ?><label class="chip"><input type="checkbox" name="provs[]" value="<?= e($p['slug']) ?>" <?= in_array($p['slug'], $sel, true) ? 'checked' : '' ?>> <?= e(pick($p)) ?></label><?php endforeach ?></div>
     <div class="formgrid">
@@ -101,7 +105,7 @@ nav(); ?>
     </div>
     <p class="muted"><?= e(t('interests')) ?></p>
     <div class="chips"><?php foreach ($cats as $c): ?><label class="chip"><input type="checkbox" name="tags[]" value="<?= e($c['slug']) ?>" <?= in_array($c['slug'], $tags, true) ? 'checked' : '' ?>> <?= e(pick($c)) ?></label><?php endforeach ?></div>
-    <div class="row"><button class="btn-gold upper"><?= e(t('make_plan')) ?></button></div>
+    <div class="row"><button class="btn-gold upper" id="plannerBtn"><?= e(t('make_plan')) ?></button></div>
   </form>
 
   <?php if ($plan !== null): ?>
@@ -119,4 +123,28 @@ nav(); ?>
     <?php endif ?>
   <?php endif ?>
 </main>
+<script>
+(function () {
+  var form = document.getElementById('plannerForm');
+  var errBox = document.getElementById('planner-error');
+  var btn = document.getElementById('plannerBtn');
+  if (!form) return;
+  form.addEventListener('submit', function (e) {
+    var checked = form.querySelectorAll('input[name="provs[]"]:checked');
+    if (checked.length === 0) {
+      e.preventDefault();
+      errBox.style.display = 'block';
+      window.scrollTo({ top: errBox.offsetTop - 100, behavior: 'smooth' });
+      return;
+    }
+    errBox.style.display = 'none';
+    btn.textContent = 'Loading... Please wait';
+    btn.style.opacity = '0.7';
+    btn.style.pointerEvents = 'none';
+    setTimeout(function () {
+      btn.textContent = 'Loading... (this takes a few seconds)';
+    }, 100);
+  });
+})();
+</script>
 <?php page_foot();

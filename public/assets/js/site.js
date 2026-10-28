@@ -155,7 +155,9 @@ async function botAct(act, arg, label) {
   if (act === 'plan2') { say(`<a href="${C.base}/planner.php?provinces=${encodeURIComponent(arg)}">${esc(T.bot_plan2)}</a>`); return again(); }
   if (act === 'explore2') { $('#chatPanel').hidden = true; return openProvince(arg); }
   if (['hotels2', 'food2', 'best2'].includes(act)) {
+    say('⏳ Loading, please wait...');
     const d = await get('province', { slug: arg });
+    if (clog.lastElementChild && clog.lastElementChild.textContent.includes('Loading')) clog.lastElementChild.remove();
     if (act === 'hotels2') { const top = d.hotels.slice().sort((a, b) => (+b.rating || 0) - (+a.rating || 0)).slice(0, 3);
       say(top.length ? top.map(h => `🏨 <b>${esc(h.name)}</b> ${esc(h.type || '')} ${esc(h.price_range || '')} · <a href="${C.base}/book.php?type=hotel&id=${h.id}">${esc(T.book_btn)}</a>`).join('<br>') : esc(T.bot_nohotel)); }
     if (act === 'food2') { const top = d.food.slice(0, 3);
