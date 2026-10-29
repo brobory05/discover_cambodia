@@ -467,3 +467,14 @@ body { animation: fadeInPage 0.6s ease-out; }
   .pro-count-grid b{font-size:1.8rem}
   .pro-alert-close{top:14px;left:14px}
 }
+body.lang-kh .pro-alert,body.lang-kh .pro-alert-text h4,body.lang-kh .pro-count-grid b,body.lang-kh .pro-pill,body.lang-kh .pro-side h5,body.lang-kh .pro-badge,body.lang-kh .btn-gold{font-family:'Khmer OS Siemreap','Siemreap','Noto Serif Khmer',serif}
+body.lang-kh .pro-badge,body.lang-kh .pro-side h5,body.lang-kh .pro-count-grid span,body.lang-kh .pro-alert-text .btn-gold{letter-spacing:0;text-transform:none}
+body.lang-kh .pro-badge{font-size:.95rem}
+body.lang-kh .pro-side h5{font-size:.95rem}
+body.lang-kh .pro-count-grid span{font-size:.8rem}
+body.lang-kh .pro-count-grid b{font-size:2rem;font-weight:400;padding-top:6px}
+body.lang-kh .pro-alert-text h4{font-size:clamp(2.2rem,5vw,3.6rem);line-height:1.45;font-weight:400}
+body.lang-kh .pro-alert-text p{line-height:2;font-size:1.05rem}
+body.lang-kh .pro-list li{line-height:1.9}
+body.lang-kh .pro-pill{font-weight:400;font-size:1rem}
+body.lang-kh .pro-alert-text .btn-gold{font-size:1rem;font-weight:400}

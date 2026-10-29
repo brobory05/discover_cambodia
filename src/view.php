@@ -54,7 +54,7 @@ function page_head(string $title): void {
 <html lang="<?= lang() === 'kh' ? 'km' : 'en' ?>"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title><?= e($title) ?></title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500;700&family=Noto+Serif+Khmer:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500;700&family=Noto+Serif+Khmer:wght@400;600;700&family=Siemreap&display=swap">
 <link rel="stylesheet" href="<?= u('assets/css/site.css') ?>">
 <script>window.CFG=<?= json_encode($cfg, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP) ?>;</script>
 </head><body class="lang-<?= lang() ?>">

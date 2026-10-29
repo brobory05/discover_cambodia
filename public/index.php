@@ -51,10 +51,22 @@ $a_hl = array_values(array_filter(array_map('trim', preg_split('/\r\n|\r|\n/', (
 $ds = !empty($current_alert['event_date']) ? strtotime($current_alert['event_date']) : null;
 $de = !empty($current_alert['event_end']) ? strtotime($current_alert['event_end']) : $ds;
 $when = '';
+$khMonths = ['', 'មករា', 'កុម្ភៈ', 'មីនា', 'មេសា', 'ឧសភា', 'មិថុនា', 'កក្កដា', 'សីហា', 'កញ្ញា', 'តុលា', 'វិច្ឆិកា', 'ធ្នូ'];
+$khDigits = fn($s) => strtr((string)$s, ['0' => '០', '1' => '១', '2' => '២', '3' => '៣', '4' => '៤', '5' => '៥', '6' => '៦', '7' => '៧', '8' => '៨', '9' => '៩']);
 if ($ds) {
-    if (date('Y-m-d', $ds) === date('Y-m-d', $de)) $when = date('M j, Y', $ds);
-    elseif (date('Y-m', $ds) === date('Y-m', $de)) $when = date('M j', $ds) . '–' . date('j, Y', $de);
-    else $when = date('M j', $ds) . ' – ' . date('M j, Y', $de);
+    $same = date('Y-m-d', $ds) === date('Y-m-d', $de);
+    $sameMonth = date('Y-m', $ds) === date('Y-m', $de);
+    if ($kh) {
+        $m1 = $khMonths[(int)date('n', $ds)]; $m2 = $khMonths[(int)date('n', $de)];
+        if ($same) $when = date('j', $ds) . ' ' . $m1 . ' ' . date('Y', $ds);
+        elseif ($sameMonth) $when = date('j', $ds) . '–' . date('j', $de) . ' ' . $m1 . ' ' . date('Y', $de);
+        else $when = date('j', $ds) . ' ' . $m1 . ' – ' . date('j', $de) . ' ' . $m2 . ' ' . date('Y', $de);
+        $when = $khDigits($when);
+    } else {
+        if ($same) $when = date('M j, Y', $ds);
+        elseif ($sameMonth) $when = date('M j', $ds) . '–' . date('j, Y', $de);
+        else $when = date('M j', $ds) . ' – ' . date('M j, Y', $de);
+    }
 }
 $side = $ds || $a_hl;
 ?>
@@ -85,7 +97,7 @@ $side = $ds || $a_hl;
     <?php if ($side): ?>
     <aside class="pro-side">
       <?php if ($ds): ?>
-      <div class="pro-count" data-start="<?= e(date('Y-m-d', $ds)) ?>" data-end="<?= e(date('Y-m-d', $de)) ?>">
+      <div class="pro-count"<?= $kh ? ' data-kh="1"' : '' ?> data-start="<?= e(date('Y-m-d', $ds)) ?>" data-end="<?= e(date('Y-m-d', $de)) ?>">
         <h5><?= $kh ? 'រាប់ថយក្រោយ' : 'Starts in' ?></h5>
         <div class="pro-count-grid">
           <div><b data-u="d">00</b><span><?= $kh ? 'ថ្ងៃ' : 'Days' ?></span></div>
@@ -135,7 +147,11 @@ $side = $ds || $a_hl;
   var grid = c.querySelector('.pro-count-grid');
   var live = c.querySelector('.pro-live');
   var title = c.querySelector('h5');
-  function pad(v) { return v < 10 ? '0' + v : '' + v; }
+  var khd = c.dataset.kh === '1';
+  function pad(v) {
+    var r = v < 10 ? '0' + v : '' + v;
+    return khd ? r.replace(/[0-9]/g, function (x) { return '០១២៣៤៥៦៧៨៩'.charAt(x); }) : r;
+  }
   function set(u, v) { c.querySelector('[data-u="' + u + '"]').textContent = pad(v); }
   var timer = setInterval(tick, 1000);
   function tick() {
