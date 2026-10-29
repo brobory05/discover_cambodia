@@ -424,10 +424,11 @@ body { animation: fadeInPage 0.6s ease-out; }
 .pro-alert {
     position: fixed;
     left: 50%;
-    bottom: 90px;
+    bottom: 40px;
     transform: translateX(-50%);
     z-index: 260;
-    width: min(880px, calc(100vw - 40px));
+    width: min(850px, calc(100vw - 40px));
+    height: 260px;
     display: flex;
     flex-direction: column;
     border-radius: 20px;
@@ -451,21 +452,21 @@ body { animation: fadeInPage 0.6s ease-out; }
 .pro-alert-overlay {
     position: absolute;
     inset: 0;
-    background: linear-gradient(90deg, rgba(13,8,5,0.97) 0%, rgba(13,8,5,0.88) 55%, rgba(13,8,5,0.55) 100%);
+    background: linear-gradient(90deg, rgba(13,8,5,0.95) 0%, rgba(13,8,5,0.8) 50%, rgba(13,8,5,0.3) 100%);
 }
 .pro-alert-content {
     position: relative;
     z-index: 10;
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 32px 38px;
-    gap: 24px;
-    flex-wrap: wrap;
+    flex-direction: column;
+    justify-content: center;
+    height: 100%;
+    padding: 0 50px;
+    gap: 10px;
 }
-.pro-alert-text { display: flex; flex-direction: column; gap: 8px; color: #FFF4D8; max-width: 560px; }
+.pro-alert-text { display: flex; flex-direction: column; gap: 8px; color: #FFF4D8; max-width: 600px; }
 .pro-badge {
-    font-size: 0.7rem;
+    font-size: 0.75rem;
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.2em;
@@ -473,35 +474,37 @@ body { animation: fadeInPage 0.6s ease-out; }
 }
 .pro-alert-text h4 {
     font-family: 'Cormorant Garamond', serif;
-    font-size: 2.1rem;
+    font-size: 2.6rem;
     line-height: 1.1;
     color: #FFF;
     text-shadow: 0 4px 12px rgba(0,0,0,0.7);
 }
-.pro-alert-text p { font-size: 0.95rem; color: #E8CFA2; line-height: 1.6; }
+.pro-alert-text p { font-size: 1.05rem; color: #E8CFA2; line-height: 1.6; }
 .pro-alert-content .btn-gold {
+    align-self: flex-start;
+    margin-top: 12px;
     white-space: nowrap;
-    padding: 13px 26px;
-    font-size: 0.78rem;
+    padding: 12px 28px;
+    font-size: 0.85rem;
     box-shadow: 0 8px 25px rgba(217,154,34,0.45);
 }
 .pro-alert-close {
     position: absolute;
-    top: 14px;
-    right: 14px;
-    width: 34px;
-    height: 34px;
+    top: 18px;
+    right: 18px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
-    background: rgba(0,0,0,0.55);
+    background: rgba(0,0,0,0.6);
     backdrop-filter: blur(6px);
-    border: 1px solid rgba(255,255,255,0.25);
+    border: 1px solid rgba(255,255,255,0.2);
     color: #FFF;
     display: grid;
     place-items: center;
     cursor: pointer;
     transition: background 0.2s, transform 0.2s;
     z-index: 20;
-    font-size: 0.95rem;
+    font-size: 1rem;
 }
 .pro-alert-close:hover { background: #D99A22; color: #1B1008; transform: rotate(90deg); }
 @keyframes slideUpAlert {
@@ -513,8 +516,24 @@ body { animation: fadeInPage 0.6s ease-out; }
     to { transform: scale(1.15); }
 }
 @media(max-width: 768px) {
-    .pro-alert { bottom: 20px; width: calc(100vw - 20px); border-radius: 16px; }
-    .pro-alert-content { padding: 24px 20px; flex-direction: column; align-items: flex-start; gap: 18px; }
-    .pro-alert-text h4 { font-size: 1.5rem; }
-    .pro-alert-content .btn-gold { width: 100%; text-align: center; }
+    .pro-alert { 
+        bottom: 20px; 
+        width: calc(100vw - 30px); 
+        height: auto;
+        border-radius: 16px; 
+    }
+    .pro-alert-content { 
+        padding: 30px 24px; 
+    }
+    .pro-alert-text h4 { 
+        font-size: 1.8rem; 
+    }
+    .pro-alert-text p { 
+        font-size: 0.95rem; 
+    }
+    .pro-alert-content .btn-gold { 
+        width: 100%; 
+        text-align: center; 
+        margin-top: 20px;
+    }
 }
