@@ -457,13 +457,24 @@ body { animation: fadeInPage 0.6s ease-out; }
 @keyframes livePulse{50%{transform:scale(1.03)}}
 @keyframes slideUpAlert{from{transform:translate(-50%,120px);opacity:0}to{transform:translate(-50%,0);opacity:1}}
 @keyframes slowZoomAlert{from{transform:scale(1.05)}to{transform:scale(1.15)}}
+.pro-actions{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-top:8px}
+.pro-actions .btn-gold{margin-top:0}
+.pro-more{display:none;align-items:center;justify-content:center;padding:14px 22px;border-radius:var(--r-sm);border:1px solid rgba(255,211,107,.55);background:rgba(255,211,107,.1);color:#FFD36B;font-size:.8rem;font-weight:800;letter-spacing:.14em;cursor:pointer}
 @media(max-width:860px){
-  .pro-alert{bottom:12px;width:calc(100vw - 24px);max-height:calc(100vh - 24px);border-radius:20px}
-  .pro-alert-content{grid-template-columns:1fr;gap:26px;padding:60px 22px 26px}
-  .pro-alert-text h4{font-size:2.5rem}
-  .pro-alert-text p{font-size:1rem}
-  .pro-alert-text .btn-gold{width:100%}
-  .pro-side{padding:20px}
+  .pro-alert{bottom:10px;width:calc(100vw - 20px);max-height:calc(100vh - 20px);max-height:calc(100dvh - 20px);border-radius:20px}
+  .pro-alert.expanded{max-height:calc(100vh - 90px);max-height:calc(100dvh - 90px)}
+  .pro-alert-overlay{background:linear-gradient(0deg,rgba(13,8,5,.96) 0%,rgba(13,8,5,.82) 48%,rgba(13,8,5,.08) 100%)}
+  .pro-alert-content{grid-template-columns:1fr;gap:18px;padding:120px 20px 20px}
+  .pro-alert-text{gap:12px}
+  .pro-alert-text h4{font-size:2rem}
+  .pro-alert-text p{display:none;font-size:1rem}
+  .pro-side{display:none;padding:18px}
+  .pro-alert.expanded .pro-alert-text p{display:block}
+  .pro-alert.expanded .pro-side{display:flex}
+  .pro-actions{width:100%;flex-wrap:nowrap}
+  .pro-actions .btn-gold{flex:1;width:auto;padding:14px 10px;font-size:.78rem}
+  .pro-more{display:inline-flex;flex:1;padding:14px 10px}
+  .pro-pill{padding:7px 12px;font-size:.82rem}
   .pro-count-grid b{font-size:1.8rem}
   .pro-alert-close{top:14px;left:14px}
 }
@@ -478,3 +489,7 @@ body.lang-kh .pro-alert-text p{line-height:2;font-size:1.05rem}
 body.lang-kh .pro-list li{line-height:1.9}
 body.lang-kh .pro-pill{font-weight:400;font-size:1rem}
 body.lang-kh .pro-alert-text .btn-gold{font-size:1rem;font-weight:400}
+@media(max-width:860px){
+  body.lang-kh .pro-alert-text h4{font-size:1.9rem}
+  body.lang-kh .pro-more{letter-spacing:0;text-transform:none;font-weight:400;font-family:'Khmer OS Siemreap','Siemreap','Noto Serif Khmer',serif;font-size:.95rem}
+}

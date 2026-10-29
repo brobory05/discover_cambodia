@@ -90,9 +90,14 @@ $side = $ds || $a_hl;
       </div>
       <?php endif; ?>
       <?php if ($a_body): ?><p><?= e($a_body) ?></p><?php endif; ?>
-      <?php if (!empty($current_alert['link_url'])): ?>
-        <a href="<?= e($current_alert['link_url']) ?>" class="btn-gold upper"><?= $kh ? 'ស្វែងយល់បន្ថែម' : 'Learn More' ?></a>
-      <?php endif; ?>
+      <div class="pro-actions">
+        <?php if (!empty($current_alert['link_url'])): ?>
+          <a href="<?= e($current_alert['link_url']) ?>" class="btn-gold upper"><?= $kh ? 'ស្វែងយល់បន្ថែម' : 'Learn More' ?></a>
+        <?php endif; ?>
+        <?php if ($a_body || $side): ?>
+          <button type="button" class="pro-more upper" data-open="<?= $kh ? 'ព័ត៌មានលម្អិត' : 'Details' ?>" data-close="<?= $kh ? 'លាក់' : 'Hide' ?>"><?= $kh ? 'ព័ត៌មានលម្អិត' : 'Details' ?></button>
+        <?php endif; ?>
+      </div>
     </div>
     <?php if ($side): ?>
     <aside class="pro-side">
@@ -130,6 +135,11 @@ $side = $ds || $a_hl;
   box.querySelector('.pro-alert-close').addEventListener('click', function () {
     box.style.display = 'none';
     try { localStorage.setItem(key, today); } catch (e) {}
+  });
+  var more = box.querySelector('.pro-more');
+  if (more) more.addEventListener('click', function () {
+    var on = box.classList.toggle('expanded');
+    more.textContent = on ? more.dataset.close : more.dataset.open;
   });
   var imgs = box.querySelectorAll('.pro-alert-img');
   if (imgs.length > 1) {
