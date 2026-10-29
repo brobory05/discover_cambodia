@@ -44,7 +44,9 @@ function admin_resources(): array {
         $D('ends_on', 'Ends on'), $F('is_active', 'Active'), $N('sort_order', 'Sort order')]],
       'alerts' => ['title' => 'Festival Alerts', 'group' => 'Promotion', 'table' => 'festival_alerts', 'desc' => false, 'fields' => [
         $T('title_en', 'Title (EN)', true), $T('title_kh', 'Title (KH)'), $A('body_en', 'Message (EN)'), $A('body_kh', 'Message (KH)'),
-        $IMGS('images', 'Banner Images (Add 2+ for a slideshow)', null), $T('link_url', 'Link (e.g. /festivals.php)'), 
+        $IMGS('images', 'Banner Images (Add 2+ for a slideshow)', null), $T('link_url', 'Link (e.g. /festivals.php)'),
+        $D('event_date', 'Event starts (for countdown)'), $D('event_end', 'Event ends'), $T('location_en', 'Location (EN)'), $T('location_kh', 'Location (KH)'),
+        $A('highlights_en', 'Highlights (EN) - one per line'), $A('highlights_kh', 'Highlights (KH) - one per line'),
         $D('start_date', 'Show From (Date)'), $D('end_date', 'Show Until (Date)'), $F('is_active', 'Active', 1), $N('sort_order', 'Sort order')]],
       'top-places' => ['title' => 'Top Places', 'group' => 'Promotion', 'table' => 'top_places', 'pk' => 'place_id', 'order' => 'sort_order', 'fields' => [
         ['createOnly' => true] + $R('place_id', 'Place', 'places', 'name_en'), $N('sort_order', 'Sort order', true)]],

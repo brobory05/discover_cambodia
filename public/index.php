@@ -33,46 +33,123 @@ foreach ($sponsors as $s) foreach ((images_of(['images' => $s['image_urls']]) ?:
 
 // --- DYNAMIC FESTIVAL ALERT ---
 $current_alert = row("select * from festival_alerts where is_active=1 and (start_date is null or start_date<=current_date) and (end_date is null or end_date>=current_date) order by sort_order, id limit 1");
-$alert_imgs = $current_alert ? array_filter(array_map('trim', explode('|', (string)$current_alert['images']))) : [];
+$alert_imgs = $current_alert ? array_values(array_filter(array_map('trim', explode('|', (string)($current_alert['images'] ?? ''))))) : [];
+if ($current_alert && !$alert_imgs) $alert_imgs = ['images/Water Festival.jpg'];
 
 page_head('Discover Cambodia — Complete Travel Guide');
 nav();
 ?>
 <main id="top">
 
-<?php if ($current_alert): ?>
-<div id="festival-alert" class="pro-alert" style="display:none;" data-id="<?= (int)$current_alert['id'] ?>">
+<?php if ($current_alert):
+$kh = lang() === 'kh';
+$pickA = fn($en, $khk) => ($kh && !empty($current_alert[$khk])) ? $current_alert[$khk] : ($current_alert[$en] ?? '');
+$a_title = $pickA('title_en', 'title_kh');
+$a_body = $pickA('body_en', 'body_kh');
+$a_loc = $pickA('location_en', 'location_kh');
+$a_hl = array_values(array_filter(array_map('trim', preg_split('/\r\n|\r|\n/', (string)$pickA('highlights_en', 'highlights_kh')))));
+$ds = !empty($current_alert['event_date']) ? strtotime($current_alert['event_date']) : null;
+$de = !empty($current_alert['event_end']) ? strtotime($current_alert['event_end']) : $ds;
+$when = '';
+if ($ds) {
+    if (date('Y-m-d', $ds) === date('Y-m-d', $de)) $when = date('M j, Y', $ds);
+    elseif (date('Y-m', $ds) === date('Y-m', $de)) $when = date('M j', $ds) . '–' . date('j, Y', $de);
+    else $when = date('M j', $ds) . ' – ' . date('M j, Y', $de);
+}
+$side = $ds || $a_hl;
+?>
+<div id="festival-alert" class="pro-alert" style="display:none;" data-id="<?= (int)$current_alert['id'] ?>" role="dialog" aria-label="<?= e($a_title) ?>">
   <div class="pro-alert-bg">
     <?php foreach ($alert_imgs as $i => $img): ?>
       <div class="pro-alert-img <?= $i === 0 ? 'on' : '' ?>" style="background-image:url('<?= e(img($img)) ?>')"></div>
     <?php endforeach; ?>
     <div class="pro-alert-overlay"></div>
+    <span class="pro-spark"></span>
   </div>
-  <div class="pro-alert-content">
+  <button type="button" class="pro-alert-close" aria-label="Close">✕</button>
+  <div class="pro-alert-content<?= $side ? '' : ' solo' ?>">
     <div class="pro-alert-text">
-      <span class="pro-badge">🎉 Upcoming Event</span>
-      <h4><?= e(lang() === 'kh' && $current_alert['title_kh'] ? $current_alert['title_kh'] : $current_alert['title_en']) ?></h4>
-      <p><?= e(lang() === 'kh' && $current_alert['body_kh'] ? $current_alert['body_kh'] : $current_alert['body_en']) ?></p>
+      <span class="pro-badge">🎉 <?= $kh ? 'ព្រឹត្តិការណ៍ខាងមុខ' : 'Upcoming Event' ?></span>
+      <h4><?= e($a_title) ?></h4>
+      <?php if ($when || $a_loc): ?>
+      <div class="pro-meta">
+        <?php if ($when): ?><span class="pro-pill">📅 <?= e($when) ?></span><?php endif; ?>
+        <?php if ($a_loc): ?><span class="pro-pill">📍 <?= e($a_loc) ?></span><?php endif; ?>
+      </div>
+      <?php endif; ?>
+      <?php if ($a_body): ?><p><?= e($a_body) ?></p><?php endif; ?>
+      <?php if (!empty($current_alert['link_url'])): ?>
+        <a href="<?= e($current_alert['link_url']) ?>" class="btn-gold upper"><?= $kh ? 'ស្វែងយល់បន្ថែម' : 'Learn More' ?></a>
+      <?php endif; ?>
     </div>
-    <?php if ($current_alert['link_url']): ?>
-      <a href="<?= e($current_alert['link_url']) ?>" class="btn-gold upper">Learn More</a>
+    <?php if ($side): ?>
+    <aside class="pro-side">
+      <?php if ($ds): ?>
+      <div class="pro-count" data-start="<?= e(date('Y-m-d', $ds)) ?>" data-end="<?= e(date('Y-m-d', $de)) ?>">
+        <h5><?= $kh ? 'រាប់ថយក្រោយ' : 'Starts in' ?></h5>
+        <div class="pro-count-grid">
+          <div><b data-u="d">00</b><span><?= $kh ? 'ថ្ងៃ' : 'Days' ?></span></div>
+          <div><b data-u="h">00</b><span><?= $kh ? 'ម៉ោង' : 'Hours' ?></span></div>
+          <div><b data-u="m">00</b><span><?= $kh ? 'នាទី' : 'Min' ?></span></div>
+          <div><b data-u="s">00</b><span><?= $kh ? 'វិនាទី' : 'Sec' ?></span></div>
+        </div>
+        <div class="pro-live" hidden>🎊 <?= $kh ? 'កំពុងប្រារព្ធឥឡូវនេះ!' : 'Happening now!' ?></div>
+      </div>
+      <?php endif; ?>
+      <?php if ($a_hl): ?>
+      <div>
+        <h5><?= $kh ? 'ចំណុចលេចធ្លោ' : 'Highlights' ?></h5>
+        <ul class="pro-list"><?php foreach ($a_hl as $h): ?><li><?= e($h) ?></li><?php endforeach; ?></ul>
+      </div>
+      <?php endif; ?>
+    </aside>
     <?php endif; ?>
   </div>
-  <button class="pro-alert-close" onclick="document.getElementById('festival-alert').style.display='none'; localStorage.setItem('fest_closed_<?= (int)$current_alert['id'] ?>', '<?= date('Y-m-d') ?>');">✕</button>
 </div>
 <script>
-  if (localStorage.getItem('fest_closed_<?= (int)$current_alert['id'] ?>') !== '<?= date('Y-m-d') ?>') {
-    document.getElementById('festival-alert').style.display = 'flex';
-    const imgs = document.querySelectorAll('.pro-alert-img');
-    if (imgs.length > 1) {
-      let idx = 0;
-      setInterval(() => {
-        imgs[idx].classList.remove('on');
-        idx = (idx + 1) % imgs.length;
-        imgs[idx].classList.add('on');
-      }, 4000);
-    }
+(function () {
+  var box = document.getElementById('festival-alert');
+  var key = 'fest_closed_<?= (int)$current_alert['id'] ?>';
+  var today = '<?= date('Y-m-d') ?>';
+  var closed = false;
+  try { closed = localStorage.getItem(key) === today; } catch (e) {}
+  if (closed) return;
+  box.style.display = 'flex';
+  box.querySelector('.pro-alert-close').addEventListener('click', function () {
+    box.style.display = 'none';
+    try { localStorage.setItem(key, today); } catch (e) {}
+  });
+  var imgs = box.querySelectorAll('.pro-alert-img');
+  if (imgs.length > 1) {
+    var idx = 0;
+    setInterval(function () {
+      imgs[idx].classList.remove('on');
+      idx = (idx + 1) % imgs.length;
+      imgs[idx].classList.add('on');
+    }, 4000);
   }
+  var c = box.querySelector('.pro-count');
+  if (!c) return;
+  var s = new Date(c.dataset.start + 'T00:00:00+07:00').getTime();
+  var en = new Date(c.dataset.end + 'T23:59:59+07:00').getTime();
+  var grid = c.querySelector('.pro-count-grid');
+  var live = c.querySelector('.pro-live');
+  var title = c.querySelector('h5');
+  function pad(v) { return v < 10 ? '0' + v : '' + v; }
+  function set(u, v) { c.querySelector('[data-u="' + u + '"]').textContent = pad(v); }
+  var timer = setInterval(tick, 1000);
+  function tick() {
+    var now = Date.now();
+    if (now > en) { c.style.display = 'none'; clearInterval(timer); return; }
+    if (now >= s) { grid.style.display = 'none'; title.style.display = 'none'; live.hidden = false; clearInterval(timer); return; }
+    var d = s - now;
+    set('d', Math.floor(d / 864e5));
+    set('h', Math.floor(d % 864e5 / 36e5));
+    set('m', Math.floor(d % 36e5 / 6e4));
+    set('s', Math.floor(d % 6e4 / 1e3));
+  }
+  tick();
+})();
 </script>
 <?php endif; ?>
 
