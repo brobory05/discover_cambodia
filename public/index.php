@@ -48,7 +48,6 @@ nav();
     <?php endforeach; ?>
     <div class="pro-alert-overlay"></div>
   </div>
-  
   <div class="pro-alert-content">
     <div class="pro-alert-text">
       <span class="pro-badge">🎉 Upcoming Event</span>
@@ -56,19 +55,14 @@ nav();
       <p><?= e(lang() === 'kh' && $current_alert['body_kh'] ? $current_alert['body_kh'] : $current_alert['body_en']) ?></p>
     </div>
     <?php if ($current_alert['link_url']): ?>
-      <a href="<?= e($current_alert['link_url']) ?>" class="btn-gold upper" style="padding:8px 16px; font-size:.7rem;">Learn More</a>
+      <a href="<?= e($current_alert['link_url']) ?>" class="btn-gold upper">Learn More</a>
     <?php endif; ?>
   </div>
-  
   <button class="pro-alert-close" onclick="document.getElementById('festival-alert').style.display='none'; localStorage.setItem('fest_closed_<?= (int)$current_alert['id'] ?>', '<?= date('Y-m-d') ?>');">✕</button>
 </div>
-
 <script>
-  // Show alert if not dismissed today
   if (localStorage.getItem('fest_closed_<?= (int)$current_alert['id'] ?>') !== '<?= date('Y-m-d') ?>') {
     document.getElementById('festival-alert').style.display = 'flex';
-    
-    // Mini Slideshow Logic
     const imgs = document.querySelectorAll('.pro-alert-img');
     if (imgs.length > 1) {
       let idx = 0;
