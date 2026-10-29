@@ -30,10 +30,35 @@ if (!$top) {
 $GLOBALS['popular'] = array_map('intval', array_column(rows("select item_id from item_views where item_type='place' and views > 0 order by views desc limit 3"), 'item_id'));
 $slidesS = [];
 foreach ($sponsors as $s) foreach ((images_of(['images' => $s['image_urls']]) ?: ['']) as $pic) $slidesS[] = ['pic' => $pic, 'title' => $s['title'], 'link' => $s['link_url']];
+
+// --- FESTIVAL ALERT LOGIC ---
+// Change these dates to match the actual festival dates
+$event_start = strtotime(date('Y') . '-11-23'); // Nov 23
+$event_end = strtotime(date('Y') . '-11-25 23:59:59'); // Nov 25
+$now = time();
+// Show alert 30 days before, until the end
+$show_alert = ($now >= ($event_start - (30 * 24 * 60 * 60)) && $now <= $event_end);
+// FOR PRESENTATION: Uncomment the line below to force it to show right now
+// $show_alert = true;
+
 page_head('Discover Cambodia — Complete Travel Guide');
 nav();
 ?>
 <main id="top">
+
+<?php if ($show_alert): ?>
+<div id="festival-alert" class="fest-alert" style="display:none;">
+  <span>🎉 <b>Upcoming Event:</b> Water Festival in Phnom Penh is on November 23–25! Plan your trip now.</span>
+  <button onclick="document.getElementById('festival-alert').style.display='none'; localStorage.setItem('fest_closed', '<?= date('Y-m-d') ?>');">✕</button>
+</div>
+<script>
+  // Show it if the user hasn't dismissed it today
+  if (localStorage.getItem('fest_closed') !== '<?= date('Y-m-d') ?>') {
+    document.getElementById('festival-alert').style.display = 'flex';
+  }
+</script>
+<?php endif; ?>
+
 <section class="hero"><i class="orb o1"></i><i class="orb o2"></i><div>
   <p class="kicker upper"><?= e(t('kicker')) ?></p>
   <h1><?= e(t('hero_a')) ?><em><?= e(t('hero_b')) ?></em></h1>

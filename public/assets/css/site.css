@@ -412,3 +412,42 @@ table.simple td{padding:12px 14px;border-bottom:1px solid var(--border);vertical
 @keyframes spin { 100% { transform: rotate(360deg); } }
 .tabs .x { flex: 0 0 34px !important; width: 34px !important; height: 34px !important; padding: 0 !important; display: grid; place-items: center; background: transparent; border: 1px solid var(--border); color: var(--cream); border-radius: 8px; }
 .tabs .x:hover { background: var(--gold); color: #1B1008; }
+
+/* Festival Alert Banner */
+.fest-alert {
+    background: linear-gradient(135deg, #FFE08B 0%, #D99A22 100%);
+    color: #1B1008;
+    padding: 12px 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    position: relative;
+    z-index: 101;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    animation: slideDown 0.5s ease;
+}
+.fest-alert b { font-weight: 800; }
+.fest-alert button {
+    background: rgba(0,0,0,0.1);
+    border: 0;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background 0.2s;
+}
+.fest-alert button:hover { background: rgba(0,0,0,0.2); }
+@keyframes slideDown { from { transform: translateY(-100%); } to { transform: translateY(0); } }
+
+/* Smooth Page Transition */
+body { animation: fadeInPage 0.6s ease-out; }
+@keyframes fadeInPage {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
