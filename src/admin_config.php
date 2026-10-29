@@ -42,6 +42,10 @@ function admin_resources(): array {
       'sponsors' => ['title' => 'Sponsors', 'group' => 'Promotion', 'table' => 'sponsors', 'fields' => [
         $T('title', 'Title', true), $IMGS('image_urls', 'Banner pictures (Img 1 shows first)', null), $T('link_url', 'Link URL', true), $D('starts_on', 'Starts on'),
         $D('ends_on', 'Ends on'), $F('is_active', 'Active'), $N('sort_order', 'Sort order')]],
+      'alerts' => ['title' => 'Festival Alerts', 'group' => 'Promotion', 'table' => 'festival_alerts', 'desc' => false, 'fields' => [
+        $T('title_en', 'Title (EN)', true), $T('title_kh', 'Title (KH)'), $A('body_en', 'Message (EN)'), $A('body_kh', 'Message (KH)'),
+        $IMGS('images', 'Banner Images (Add 2+ for a slideshow)', null), $T('link_url', 'Link (e.g. /festivals.php)'), 
+        $D('start_date', 'Show From (Date)'), $D('end_date', 'Show Until (Date)'), $F('is_active', 'Active', 1), $N('sort_order', 'Sort order')]],
       'top-places' => ['title' => 'Top Places', 'group' => 'Promotion', 'table' => 'top_places', 'pk' => 'place_id', 'order' => 'sort_order', 'fields' => [
         ['createOnly' => true] + $R('place_id', 'Place', 'places', 'name_en'), $N('sort_order', 'Sort order', true)]],
       'notifications' => ['title' => 'Notifications', 'group' => 'Promotion', 'table' => 'notifications', 'desc' => true, 'fields' => [
@@ -114,7 +118,7 @@ function admin_resources(): array {
         'restaurants' => ['province_id', 'province_name', 'restaurant_name_en'], 'festivals' => ['name_en'], 'sponsors' => ['title'], 'top-places' => ['place_id'],
         'notifications' => ['title_en'], 'menu-items' => ['restaurant_id', 'name_en'], 'shops' => ['province_id', 'slug', 'name_en'], 'rewards' => ['name_en', 'cost_points'],
         'loyalty' => ['level', 'min_spent', 'discount_pct'], 'settings' => ['key'], 'guide-list' => ['name', 'phone'], 'transport-list' => ['name', 'phone', 'vehicle_type'],
-        'room-prices' => ['bed_count', 'class', 'price_usd']];
+        'room-prices' => ['bed_count', 'class', 'price_usd'], 'alerts' => ['title_en']];
     foreach ($req as $slug => $keys) foreach ($out[$slug]['fields'] as &$f) if (in_array($f['key'], $keys, true)) $f['req'] = true;
     unset($f);
     $badge = ['guides' => "status = 'pending'", 'transport' => "status = 'pending'", 'reservations' => "status = 'pending' or payment_status = 'pending_review'",

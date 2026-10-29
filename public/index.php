@@ -31,30 +31,53 @@ $GLOBALS['popular'] = array_map('intval', array_column(rows("select item_id from
 $slidesS = [];
 foreach ($sponsors as $s) foreach ((images_of(['images' => $s['image_urls']]) ?: ['']) as $pic) $slidesS[] = ['pic' => $pic, 'title' => $s['title'], 'link' => $s['link_url']];
 
-// --- FESTIVAL ALERT LOGIC ---
-// Change these dates to match the actual festival dates
-$event_start = strtotime(date('Y') . '-11-23'); // Nov 23
-$event_end = strtotime(date('Y') . '-11-25 23:59:59'); // Nov 25
-$now = time();
-// Show alert 30 days before, until the end
-$show_alert = ($now >= ($event_start - (30 * 24 * 60 * 60)) && $now <= $event_end);
-// FOR PRESENTATION: Uncomment the line below to force it to show right now
-// $show_alert = true;
+// --- DYNAMIC FESTIVAL ALERT ---
+$current_alert = row("select * from festival_alerts where is_active=1 and (start_date is null or start_date<=current_date) and (end_date is null or end_date>=current_date) order by sort_order, id limit 1");
+$alert_imgs = $current_alert ? array_filter(array_map('trim', explode('|', (string)$current_alert['images']))) : [];
 
 page_head('Discover Cambodia — Complete Travel Guide');
 nav();
 ?>
 <main id="top">
 
-<?php if ($show_alert): ?>
-<div id="festival-alert" class="fest-alert" style="display:none;">
-  <span>🎉 <b>Upcoming Event:</b> Water Festival in Phnom Penh is on November 23–25! Plan your trip now.</span>
-  <button onclick="document.getElementById('festival-alert').style.display='none'; localStorage.setItem('fest_closed', '<?= date('Y-m-d') ?>');">✕</button>
+<?php if ($current_alert): ?>
+<div id="festival-alert" class="pro-alert" style="display:none;" data-id="<?= (int)$current_alert['id'] ?>">
+  <div class="pro-alert-bg">
+    <?php foreach ($alert_imgs as $i => $img): ?>
+      <div class="pro-alert-img <?= $i === 0 ? 'on' : '' ?>" style="background-image:url('<?= e(img($img)) ?>')"></div>
+    <?php endforeach; ?>
+    <div class="pro-alert-overlay"></div>
+  </div>
+  
+  <div class="pro-alert-content">
+    <div class="pro-alert-text">
+      <span class="pro-badge">🎉 Upcoming Event</span>
+      <h4><?= e(lang() === 'kh' && $current_alert['title_kh'] ? $current_alert['title_kh'] : $current_alert['title_en']) ?></h4>
+      <p><?= e(lang() === 'kh' && $current_alert['body_kh'] ? $current_alert['body_kh'] : $current_alert['body_en']) ?></p>
+    </div>
+    <?php if ($current_alert['link_url']): ?>
+      <a href="<?= e($current_alert['link_url']) ?>" class="btn-gold upper" style="padding:8px 16px; font-size:.7rem;">Learn More</a>
+    <?php endif; ?>
+  </div>
+  
+  <button class="pro-alert-close" onclick="document.getElementById('festival-alert').style.display='none'; localStorage.setItem('fest_closed_<?= (int)$current_alert['id'] ?>', '<?= date('Y-m-d') ?>');">✕</button>
 </div>
+
 <script>
-  // Show it if the user hasn't dismissed it today
-  if (localStorage.getItem('fest_closed') !== '<?= date('Y-m-d') ?>') {
+  // Show alert if not dismissed today
+  if (localStorage.getItem('fest_closed_<?= (int)$current_alert['id'] ?>') !== '<?= date('Y-m-d') ?>') {
     document.getElementById('festival-alert').style.display = 'flex';
+    
+    // Mini Slideshow Logic
+    const imgs = document.querySelectorAll('.pro-alert-img');
+    if (imgs.length > 1) {
+      let idx = 0;
+      setInterval(() => {
+        imgs[idx].classList.remove('on');
+        idx = (idx + 1) % imgs.length;
+        imgs[idx].classList.add('on');
+      }, 4000);
+    }
   }
 </script>
 <?php endif; ?>

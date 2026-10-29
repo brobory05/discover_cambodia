@@ -413,37 +413,103 @@ table.simple td{padding:12px 14px;border-bottom:1px solid var(--border);vertical
 .tabs .x { flex: 0 0 34px !important; width: 34px !important; height: 34px !important; padding: 0 !important; display: grid; place-items: center; background: transparent; border: 1px solid var(--border); color: var(--cream); border-radius: 8px; }
 .tabs .x:hover { background: var(--gold); color: #1B1008; }
 
-/* Festival Alert Banner */
-.fest-alert {
-    background: linear-gradient(135deg, #FFE08B 0%, #D99A22 100%);
-    color: #1B1008;
-    padding: 12px 20px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 15px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 0.95rem;
+/* Premium Festival Alert */
+.pro-alert {
     position: relative;
-    z-index: 101;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-    animation: slideDown 0.5s ease;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 16px 24px;
+    margin: 0 auto;
+    max-width: 1300px;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+    isolation: isolate;
+    animation: slideDown 0.6s var(--ease);
 }
-.fest-alert b { font-weight: 800; }
-.fest-alert button {
-    background: rgba(0,0,0,0.1);
-    border: 0;
+.pro-alert-bg {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+}
+.pro-alert-img {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    opacity: 0;
+    transition: opacity 1s ease;
+    transform: scale(1.05);
+    animation: slowZoom 10s infinite alternate;
+}
+.pro-alert-img.on { opacity: 1; }
+.pro-alert-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, rgba(13,8,5,0.95) 0%, rgba(13,8,5,0.7) 60%, rgba(13,8,5,0.4) 100%);
+}
+.pro-alert-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+.pro-alert-text {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    color: #FFF4D8;
+}
+.pro-badge {
+    font-size: 0.65rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: #FFD36B;
+}
+.pro-alert-text h4 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.4rem;
+    line-height: 1.1;
+    color: #FFF;
+}
+.pro-alert-text p {
+    font-size: 0.85rem;
+    color: #E8CFA2;
+}
+.pro-alert-close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
     width: 28px;
     height: 28px;
     border-radius: 50%;
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.3);
+    color: #FFF;
     display: grid;
     place-items: center;
     cursor: pointer;
-    font-weight: bold;
-    transition: background 0.2s;
+    transition: background 0.2s, transform 0.2s;
+    z-index: 10;
 }
-.fest-alert button:hover { background: rgba(0,0,0,0.2); }
-@keyframes slideDown { from { transform: translateY(-100%); } to { transform: translateY(0); } }
+.pro-alert-close:hover {
+    background: #D99A22;
+    color: #1B1008;
+    transform: rotate(90deg);
+}
+@keyframes slideDown { from { transform: translateY(-100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@keyframes slowZoom { from { transform: scale(1.05); } to { transform: scale(1.15); } }
+
+@media(max-width: 768px) {
+    .pro-alert { border-radius: 0; padding: 16px; flex-direction: column; align-items: flex-start; }
+    .pro-alert-content { flex-direction: column; align-items: flex-start; }
+    .pro-alert-text h4 { font-size: 1.2rem; }
+}
 
 /* Smooth Page Transition */
 body { animation: fadeInPage 0.6s ease-out; }
